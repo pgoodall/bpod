@@ -37,16 +37,17 @@ from pathlib import Path
 import requests
 
 # get image url
-response = requests.get("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")
-image_data = json.loads(response.text)
-
-image_url = image_data["images"][0]["url"]
-image_url = image_url.split("&")[0]
-full_image_url = "https://www.bing.com" + image_url
+def getImageUrl():
+    response = requests.get("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")
+    image_data = json.loads(response.text)
+    image_url = image_data["images"][0]["url"]
+    image_url = image_url.split("&")[0]
+    return "https://www.bing.com" + image_url
 
 # image's name
 today = datetime.date.today().strftime("%Y-%m-%d")
-image_name = image_url.split(".")[-2:]
+full_image_url = getImageUrl()
+image_name = full_image_url.split(".")[-2:]
 full_image_name = today + "." + image_name[1]
 # download and save image
 """
