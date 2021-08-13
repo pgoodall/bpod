@@ -36,6 +36,8 @@ import os
 from pathlib import Path
 import requests
 
+today = datetime.date.today().strftime("%Y-%m-%d")
+
 # get image url
 def getImageUrl():
     response = requests.get("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")
@@ -44,11 +46,11 @@ def getImageUrl():
     image_url = image_url.split("&")[0]
     return "https://www.bing.com" + image_url
 
-# image's name
-today = datetime.date.today().strftime("%Y-%m-%d")
-full_image_url = getImageUrl()
-image_name = full_image_url.split(".")[-2:]
-full_image_name = today + "." + image_name[1]
+# get image name
+def getImageName(tstamp, imageUrl):
+    image_name = imageUrl.split(".")[-2:]
+    return today + "." + image_name[1]
+
 # download and save image
 """
 ToDo:
@@ -56,12 +58,14 @@ ToDo:
 [ ] Scan the downloaded file for viruses
 [ ] Manage the local cache to either delete the image daily or mange the size of the cache
 """
+full_image_url = getImageUrl()
+local_image_name = getImageName(today, full_image_url)
 img_data = requests.get(full_image_url).content
-with open(full_image_name, 'wb') as handler:
+with open(local_image_name, 'wb') as handler:
     handler.write(img_data)
 
 # ubuntu command to set wallpaper
 #curdir = str(Path.cwd())
-command = "gsettings set org.gnome.desktop.background picture-uri 'file://" + str(Path.cwd()) + "/" + full_image_name + "'"
+command = "gsettings set org.gnome.desktop.background picture-uri 'file://" + str(Path.cwd()) + "/" + local_image_name + "'"
 print(command)
 os.system(command)
