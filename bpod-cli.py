@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
 Python script to set bing image of the day as desktop wallpaper. Based on work by Anurag Rana.
