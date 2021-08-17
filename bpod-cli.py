@@ -82,4 +82,4 @@ with open(cache_file, 'wb') as handler:
 # ubuntu command to set wallpaper
 command = "gsettings set org.gnome.desktop.background picture-uri 'file://" + cache_file + "'"
 print(command)
-#os.system(command)
+os.system(command)
