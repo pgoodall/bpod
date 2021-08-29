@@ -33,14 +33,17 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 import datetime
 import json
 import os
+import subprocess
 from pathlib import Path
+from sys import stdout
 import requests
 
 today = datetime.date.today().strftime("%Y-%m-%d")
-CACHEDIR = os.path.join(os.path.expanduser('~'), '.local/share/bpod/cache/')
+cache_dir = os.path.join(os.path.expanduser('~'), '.local/share/bpod/cache/')
+current_bg_file = subprocess.check_output(["gsettings", "get", "org.gnome.desktop.background", "picture-uri"], text=True)
 
 # get image url
-def getImageUrl():
+def get_image_url():
     response = requests.get("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")
     image_data = json.loads(response.text)
     image_url = image_data["images"][0]["url"]
@@ -48,38 +51,44 @@ def getImageUrl():
     return "https://www.bing.com" + image_url
 
 # get image name
-def getImageName(tstamp, imageUrl):
+def get_image_name(tstamp, imageUrl):
     image_name = imageUrl.split(".")[-2:]
     return today + "." + image_name[1]
 
 # Check for the Cache directory, and create it if it doesn't exist
-'''
-ToDo:
-[ ] Check the mode if the directory already exists
-'''
-def checkCache(cdir):
+def check_cache(cdir):
     if os.path.exists(cdir):
         pass
     else:
         os.makedirs(cdir, mode = 0o700)
     return
 
+# Set background on Ubuntu
+def set_background_ubuntu(new_bg):
+    command = "gsettings set org.gnome.desktop.background picture-uri 'file://" + new_bg + "'"
+    print("Applying new background image...")
+    os.system(command)
+
+
+# Check if they want to keep the new background or restore the previous background
+def check_for_save(previous_bg):
+    command = "gsettings set org.gnome.desktop.background picture-uri " + previous_bg
+    keep_prompt = input("Keep the new background? (y/n): ")
+    if keep_prompt == 'n':
+        print("Restoring previous background...")
+        print(command)
+        os.system(command)
+
+
+
 # download and save image
-"""
-ToDo:
-[ ] Save to a named cache directory in your home directory
-[ ] Scan the downloaded file for viruses
-[ ] Manage the local cache to either delete the image daily or mange the size of the cache
-"""
-image_url = getImageUrl()
-image_name = getImageName(today, image_url)
-cache_file = os.path.join(CACHEDIR, image_name)
-checkCache(CACHEDIR)
+image_url = get_image_url()
+image_name = get_image_name(today, image_url)
+cache_file = os.path.join(cache_dir, image_name)
+check_cache(cache_dir)
 img_data = requests.get(image_url).content
 with open(cache_file, 'wb') as handler:
     handler.write(img_data)
 
-# ubuntu command to set wallpaper
-command = "gsettings set org.gnome.desktop.background picture-uri 'file://" + cache_file + "'"
-print(command)
-os.system(command)
+set_background_ubuntu(cache_file)
+check_for_save(current_bg_file)
