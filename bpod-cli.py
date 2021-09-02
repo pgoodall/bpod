@@ -34,13 +34,8 @@ import datetime
 import json
 import os
 import subprocess
-from pathlib import Path
-from sys import stdout
 import requests
 
-today = datetime.date.today().strftime("%Y-%m-%d")
-cache_dir = os.path.join(os.path.expanduser('~'), '.local/share/bpod/cache/')
-current_bg_file = subprocess.check_output(["gsettings", "get", "org.gnome.desktop.background", "picture-uri"], text=True)
 
 # get image url
 def get_image_url():
@@ -80,15 +75,22 @@ def check_for_save(previous_bg):
         os.system(command)
 
 
+# Variables independent of image source
+today = datetime.date.today().strftime("%Y-%m-%d")
+cache_dir = os.path.join(os.path.expanduser('~'), '.local/share/bpod/cache/')
+check_cache(cache_dir)
+current_bg_file = subprocess.check_output(["gsettings", "get", "org.gnome.desktop.background", "picture-uri"], text=True)
 
-# download and save image
+# Variables that may change with image source
 image_url = get_image_url()
 image_name = get_image_name(today, image_url)
 cache_file = os.path.join(cache_dir, image_name)
-check_cache(cache_dir)
+
+# download the image and save locally
 img_data = requests.get(image_url).content
 with open(cache_file, 'wb') as handler:
     handler.write(img_data)
 
+# set the background
 set_background_ubuntu(cache_file)
 check_for_save(current_bg_file)
