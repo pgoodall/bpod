@@ -1,0 +1,4 @@
+How does GitHub render this markdown?
+
+NOTE: This is a note.
+IMPORTANT: This is important!
